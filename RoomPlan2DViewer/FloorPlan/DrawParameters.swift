@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SpriteKit
 
 // Universal scaling factor
 let scalingFactor: CGFloat = 200
@@ -17,7 +18,7 @@ let floorPlanSurfaceColor = UIColor(named: "AccentColor")!
 // Line widths
 let surfaceWith: CGFloat = 22.0
 let hideSurfaceWith: CGFloat = 24.0
-let windowWidth: CGFloat = 8.0
+let windowWidth_old: CGFloat = 8.0
 let doorArcWidth: CGFloat = 8.0
 let objectOutlineWidth: CGFloat = 8.0
 
@@ -46,3 +47,13 @@ let dimensionWidth: CGFloat = 1.0
 let labelFontSize: CGFloat = 12.0
 let labelFont = "Helvetica"
 let metersToInchesFactor: CGFloat = 39.3701
+
+// 在文件顶部添加新的颜色常量
+let wallColor = SKColor.darkGray
+let windowColor = SKColor(red: 0.7, green: 0.9, blue: 1.0, alpha: 1.0) // 浅蓝色
+let doorColor = SKColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0) // 棕色
+
+// 修改线条宽度常量
+let wallWidth: CGFloat = 11.0
+let doorWidth: CGFloat = 4.0
+let windowWidth: CGFloat = 4.0

@@ -94,6 +94,8 @@ class FloorPlanSurface: SKNode {
         
         // The door itself
         let doorShape = createShapeNode(from: doorPath)
+        doorShape.strokeColor = doorColor
+        doorShape.lineWidth = doorWidth
         doorShape.lineCap = .square
         doorShape.zPosition = doorZPosition
         
@@ -112,7 +114,8 @@ class FloorPlanSurface: SKNode {
         let dashedArcPath = doorArcPath.copy(dashingWithPhase: 1, lengths: dashPattern)
 
         let doorArcShape = createShapeNode(from: dashedArcPath)
-        doorArcShape.lineWidth = doorArcWidth
+        doorArcShape.strokeColor = doorColor
+        doorArcShape.lineWidth = doorWidth
         doorArcShape.zPosition = doorArcZPosition
         
         addChild(hideWallShape)
@@ -135,6 +138,8 @@ class FloorPlanSurface: SKNode {
     private func drawWall() {
         let wallPath = createPath(from: pointA, to: pointB)
         let wallShape = createShapeNode(from: wallPath)
+        wallShape.strokeColor = wallColor
+        wallShape.lineWidth = wallWidth
         wallShape.lineCap = .round
         
         let dimensionsPath = createDimPath(from: pointADim, to: pointBDim)
@@ -157,10 +162,38 @@ class FloorPlanSurface: SKNode {
         hideWallShape.lineWidth = hideSurfaceWith
         hideWallShape.zPosition = hideSurfaceZPosition
         
-        // The window itself
-        let windowShape = createShapeNode(from: windowPath)
+        // The window itself (dashed line)
+        let windowShape = SKShapeNode()
+        let dashedPath = CGMutablePath()
+        let dashLength: CGFloat = 6.0
+        let gapLength: CGFloat = 3.0
+        let endPoint = CGPoint(x: pointB.x - pointA.x, y: pointB.y - pointA.y)
+        var currentPoint = CGPoint.zero
+        var remainingLength = sqrt(endPoint.x * endPoint.x + endPoint.y * endPoint.y)
+        let angle = atan2(endPoint.y, endPoint.x)
+        
+        while remainingLength > 0 {
+            let dashDistance = min(dashLength, remainingLength)
+            let nextPoint = CGPoint(x: currentPoint.x + dashDistance * cos(angle),
+                                    y: currentPoint.y + dashDistance * sin(angle))
+            dashedPath.move(to: currentPoint)
+            dashedPath.addLine(to: nextPoint)
+            currentPoint = nextPoint
+            remainingLength -= dashDistance
+            
+            if remainingLength > 0 {
+                let gapDistance = min(gapLength, remainingLength)
+                currentPoint = CGPoint(x: currentPoint.x + gapDistance * cos(angle),
+                                       y: currentPoint.y + gapDistance * sin(angle))
+                remainingLength -= gapDistance
+            }
+        }
+        
+        windowShape.path = dashedPath
+        windowShape.strokeColor = windowColor
         windowShape.lineWidth = windowWidth
         windowShape.zPosition = windowZPosition
+        windowShape.position = pointA
         
         addChild(hideWallShape)
         addChild(windowShape)
@@ -178,9 +211,7 @@ class FloorPlanSurface: SKNode {
     
     private func createShapeNode(from path: CGPath) -> SKShapeNode {
         let shapeNode = SKShapeNode(path: path)
-        shapeNode.strokeColor = floorPlanSurfaceColor
-        shapeNode.lineWidth = surfaceWith
-        
+        // 移除默认的颜色设置，因为我们现在在每个具体的绘制方法中设置颜色
         return shapeNode
     }
     

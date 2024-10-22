@@ -67,6 +67,8 @@ class FloorPlanSurface: SKNode {
             drawWall()
         case .window:
             drawWindow()
+        case .floor:
+            drawFloor()
         @unknown default:
             drawWall()
         }
@@ -77,7 +79,9 @@ class FloorPlanSurface: SKNode {
     }
     
     // MARK: - Draw
-
+    private func drawFloor(){
+        //TODO
+    }
     private func drawDoor() {
         let hideWallPath = createPath(from: pointA, to: pointB)
         let doorPath = createPath(from: pointA, to: pointC)
@@ -180,49 +184,49 @@ class FloorPlanSurface: SKNode {
         return shapeNode
     }
     
-    private func drawMeasurement() {
-        let length = CGFloat(capturedSurface.dimensions.x) * scalingFactor
+    // private func drawMeasurement() {
+    //     let length = CGFloat(capturedSurface.dimensions.x) * scalingFactor
         
-        // 计算测量线的位置（墙的外围）
-        let measurementOffset = surfaceWith / 2 + measurementLineOffset
+    //     // 计算测量线的位置（墙的外围）
+    //     let measurementOffset = surfaceWith / 2 + measurementLineOffset
         
-        // 创建测量线
-        let measurementPath = CGMutablePath()
-        measurementPath.move(to: CGPoint(x: -length/2, y: measurementOffset))
-        measurementPath.addLine(to: CGPoint(x: length/2, y: measurementOffset))
+    //     // 创建测量线
+    //     let measurementPath = CGMutablePath()
+    //     measurementPath.move(to: CGPoint(x: -length/2, y: measurementOffset))
+    //     measurementPath.addLine(to: CGPoint(x: length/2, y: measurementOffset))
         
-        let measurementLine = SKShapeNode(path: measurementPath)
-        measurementLine.strokeColor = measurementLineColor
-        measurementLine.lineWidth = measurementLineWidth
+    //     let measurementLine = SKShapeNode(path: measurementPath)
+    //     measurementLine.strokeColor = measurementLineColor
+    //     measurementLine.lineWidth = measurementLineWidth
         
-        // 添加截断符
-        let endCapLength: CGFloat = 10
-        let leftEndCap = SKShapeNode(path: createEndCapPath(at: CGPoint(x: -length/2, y: measurementOffset), length: endCapLength))
-        let rightEndCap = SKShapeNode(path: createEndCapPath(at: CGPoint(x: length/2, y: measurementOffset), length: endCapLength))
-        leftEndCap.strokeColor = measurementLineColor
-        rightEndCap.strokeColor = measurementLineColor
-        leftEndCap.lineWidth = measurementLineWidth
-        rightEndCap.lineWidth = measurementLineWidth
+    //     // 添加截断符
+    //     let endCapLength: CGFloat = 10
+    //     let leftEndCap = SKShapeNode(path: createEndCapPath(at: CGPoint(x: -length/2, y: measurementOffset), length: endCapLength))
+    //     let rightEndCap = SKShapeNode(path: createEndCapPath(at: CGPoint(x: length/2, y: measurementOffset), length: endCapLength))
+    //     leftEndCap.strokeColor = measurementLineColor
+    //     rightEndCap.strokeColor = measurementLineColor
+    //     leftEndCap.lineWidth = measurementLineWidth
+    //     rightEndCap.lineWidth = measurementLineWidth
         
-        // 创建测量文本
-        let measurementText = SKLabelNode(text: String(format: "%.2f m", capturedSurface.dimensions.x))
-        measurementText.fontSize = measurementTextFontSize
-        measurementText.fontColor = measurementTextColor
-        measurementText.position = CGPoint(x: 0, y: measurementOffset + endCapLength + 5)
-        measurementText.verticalAlignmentMode = .bottom
+    //     // 创建测量文本
+    //     let measurementText = SKLabelNode(text: String(format: "%.2f m", capturedSurface.dimensions.x))
+    //     measurementText.fontSize = measurementTextFontSize
+    //     measurementText.fontColor = measurementTextColor
+    //     measurementText.position = CGPoint(x: 0, y: measurementOffset + endCapLength + 5)
+    //     measurementText.verticalAlignmentMode = .bottom
         
-        addChild(measurementLine)
-        addChild(leftEndCap)
-        addChild(rightEndCap)
-        addChild(measurementText)
-    }
+    //     addChild(measurementLine)
+    //     addChild(leftEndCap)
+    //     addChild(rightEndCap)
+    //     addChild(measurementText)
+    // }
     
-    private func createEndCapPath(at point: CGPoint, length: CGFloat) -> CGPath {
-        let path = CGMutablePath()
-        path.move(to: CGPoint(x: point.x, y: point.y - length/2))
-        path.addLine(to: CGPoint(x: point.x, y: point.y + length/2))
-        return path
-    }
+    // private func createEndCapPath(at point: CGPoint, length: CGFloat) -> CGPath {
+    //     let path = CGMutablePath()
+    //     path.move(to: CGPoint(x: point.x, y: point.y - length/2))
+    //     path.addLine(to: CGPoint(x: point.x, y: point.y + length/2))
+    //     return path
+    // }
     
     private func createDimPath(from pointA: CGPoint, to pointB: CGPoint) -> CGMutablePath {
         let path = CGMutablePath()

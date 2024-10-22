@@ -46,7 +46,7 @@ let dimensionLabelWidth: CGFloat = 50.0
 let dimensionWidth: CGFloat = 1.0
 let labelFontSize: CGFloat = 12.0
 let labelFont = "Helvetica"
-let metersToInchesFactor: CGFloat = 39.3701
+// let metersToInchesFactor: CGFloat = 39.3701
 
 // 在文件顶部添加新的颜色常量
 let wallColor = SKColor.darkGray
@@ -57,3 +57,5 @@ let doorColor = SKColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0) // 棕色
 let wallWidth: CGFloat = 11.0
 let doorWidth: CGFloat = 4.0
 let windowWidth: CGFloat = 4.0
+
+let doorWindowDimensionOffset: CGFloat = 20.0

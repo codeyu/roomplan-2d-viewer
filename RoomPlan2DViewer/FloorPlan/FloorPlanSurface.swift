@@ -109,18 +109,27 @@ class FloorPlanSurface: SKNode {
             clockwise: true
         )
         
-        // Create a dashed path
-        let dashPattern: [CGFloat] = [24.0, 8.0]
-        let dashedArcPath = doorArcPath.copy(dashingWithPhase: 1, lengths: dashPattern)
-
-        let doorArcShape = createShapeNode(from: dashedArcPath)
+        let doorArcShape = createShapeNode(from: doorArcPath)
         doorArcShape.strokeColor = doorColor
         doorArcShape.lineWidth = doorWidth
         doorArcShape.zPosition = doorArcZPosition
         
+        // Add dimension line and label
+        let doorDimPointA = CGPoint(x: pointADim.x, y: pointADim.y - doorWindowDimensionOffset)
+        let doorDimPointB = CGPoint(x: pointBDim.x, y: pointBDim.y - doorWindowDimensionOffset)
+        
+        let dimensionsPath = createDimPath(from: doorDimPointA, to: doorDimPointB)
+        let dimensionsShape = createDimNode(from: dimensionsPath)
+        dimensionsShape.lineCap = .round
+        
+        let dimensionsLabel = createDimLabel()
+        dimensionsLabel.position.y -= doorWindowDimensionOffset // 调整标签位置
+        
         addChild(hideWallShape)
         addChild(doorShape)
         addChild(doorArcShape)
+        addChild(dimensionsShape)
+        addChild(dimensionsLabel)
     }
     
     private func drawOpening() {
@@ -195,8 +204,21 @@ class FloorPlanSurface: SKNode {
         windowShape.zPosition = windowZPosition
         windowShape.position = pointA
         
+        // Add dimension line and label
+        let windowDimPointA = CGPoint(x: pointADim.x, y: pointADim.y - doorWindowDimensionOffset)
+        let windowDimPointB = CGPoint(x: pointBDim.x, y: pointBDim.y - doorWindowDimensionOffset)
+        
+        let dimensionsPath = createDimPath(from: windowDimPointA, to: windowDimPointB)
+        let dimensionsShape = createDimNode(from: dimensionsPath)
+        dimensionsShape.lineCap = .round
+        
+        let dimensionsLabel = createDimLabel()
+        dimensionsLabel.position.y -= doorWindowDimensionOffset // 调整标签位置
+        
         addChild(hideWallShape)
         addChild(windowShape)
+        addChild(dimensionsShape)
+        addChild(dimensionsLabel)
     }
     
     // MARK: - Helper functions
@@ -269,19 +291,27 @@ class FloorPlanSurface: SKNode {
         
         // main line with gap for label
         path.move(to: pointA)
-        path.addLine(to: CGPoint(x: -dimensionLabelWidth/2, y: -dimensionLineDistFromSurface))
+        path.addLine(to: CGPoint(x: -dimensionLabelWidth/2, y: pointA.y))
         path.move(to: pointB)
-        path.addLine(to: CGPoint(x: dimensionLabelWidth/2, y: -dimensionLineDistFromSurface))
+        path.addLine(to: CGPoint(x: dimensionLabelWidth/2, y: pointB.y))
         
         return path
     }
     
     private func createDimLabel() -> SKLabelNode {
-        let dimTotalInches = CGFloat(self.capturedSurface.dimensions.x) * metersToInchesFactor
-        let feet = Int(dimTotalInches / 12)
-        let inches = Int(round(dimTotalInches.truncatingRemainder(dividingBy: 12)))
+        let dimMeters = self.capturedSurface.dimensions.x
         
-        let label = SKLabelNode(text: "\(feet)' \(inches)\"")
+        // 根据尺寸大小选择合适的单位（米或厘米）
+        let (value, unit) = if dimMeters < 1 {
+            (dimMeters * 100, "cm")
+        } else {
+            (dimMeters, "m")
+        }
+        
+        // 格式化标签文本
+        let formattedText = String(format: "%.2f %@", value, unit)
+        
+        let label = SKLabelNode(text: formattedText)
         label.fontColor = floorPlanSurfaceColor
         label.position.y = -dimensionLineDistFromSurface - labelFontSize/2
         label.fontSize = labelFontSize

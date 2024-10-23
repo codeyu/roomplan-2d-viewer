@@ -16,49 +16,52 @@ struct ExportView: View {
     let floorPlanImage: UIImage
     @Environment(\.presentationMode) var presentationMode
     @State private var xmlString: String = ""
-    @State private var showingSaveSuccessAlert = false
-    @State private var showingSaveErrorAlert = false
-    @State private var saveError: Error?
+    @State private var isCreatingZIP = false
+    @State private var showingShareSheet = false
+    @State private var zipFileURL: URL?
+    @State private var showingErrorAlert = false
+    @State private var errorMessage: String = ""
 
     var body: some View {
         NavigationView {
-            VStack {
-                Text("XML Data Preview")
-                    .font(.headline)
-                ScrollView {
-                    Text(xmlString)
-                        .font(.system(.body, design: .monospaced))
+            ZStack {
+                VStack {
+                    Text("XML Data Preview")
+                        .font(.headline)
+                    ScrollView {
+                        Text(xmlString)
+                            .font(.system(.body, design: .monospaced))
+                            .padding()
+                    }
+                }
+                
+                if isCreatingZIP {
+                    ProgressView("Creating ZIP...")
                         .padding()
+                        .background(Color.secondary.colorInvert())
+                        .cornerRadius(10)
                 }
             }
-            .navigationBarTitle("Preview XML", displayMode: .inline)
+            .navigationBarTitle("Export Data", displayMode: .inline)
             .navigationBarItems(
                 leading: Button("Cancel") {
                     presentationMode.wrappedValue.dismiss()
                 },
-                trailing: Button("Save ZIP") {
-                    saveZIPFile()
+                trailing: Button("Share ZIP") {
+                    createAndShareZIP()
                 }
             )
         }
         .onAppear {
             generateXML()
         }
-        .alert(isPresented: $showingSaveSuccessAlert) {
-            Alert(
-                title: Text("Success"),
-                message: Text("ZIP file has been saved successfully."),
-                dismissButton: .default(Text("OK")) {
-                    presentationMode.wrappedValue.dismiss()
-                }
-            )
+        .sheet(isPresented: $showingShareSheet) {
+            if let url = zipFileURL {
+                ActivityViewController(activityItems: [url])
+            }
         }
-        .alert(isPresented: $showingSaveErrorAlert) {
-            Alert(
-                title: Text("Save Error"),
-                message: Text(saveError?.localizedDescription ?? "An unknown error occurred while saving the file."),
-                dismissButton: .default(Text("OK"))
-            )
+        .alert(isPresented: $showingErrorAlert) {
+            Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
         }
     }
 
@@ -222,32 +225,65 @@ struct ExportView: View {
         }
     }
     
-    private func saveXMLToFile() {
-        let filename = "CapturedRoom_\(Date().timeIntervalSince1970).xml"
-        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+//    private func saveXMLToFile() {
+//        let filename = "CapturedRoom_\(Date().timeIntervalSince1970).xml"
+//        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(filename)
+//        
+//        do {
+//            try xmlString.write(to: url, atomically: true, encoding: .utf8)
+//            showingSaveSuccessAlert = true
+//        } catch {
+//            saveError = error
+//            showingSaveErrorAlert = true
+//        }
+//    }
+//    private func saveZIPFile() {
+//        let filename = "RoomPlan_Export_\(Date().timeIntervalSince1970)"
+//        let zipFilename = "\(filename).zip"
+//        
+//        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+//        let zipFileURL = documentsDirectory.appendingPathComponent(zipFilename)
+//        
+//        guard let archive = Archive(url: zipFileURL, accessMode: .create) else {
+//            saveError = NSError(domain: "ZIPCreation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create ZIP archive"])
+//            showingSaveErrorAlert = true
+//            return
+//        }
+//        
+//        do {
+//            // Add XML file to ZIP
+//            let xmlData = xmlString.data(using: .utf8)!
+//            try archive.addEntry(with: "\(filename).xml", type: .file, uncompressedSize: UInt32(xmlData.count), provider: { (position, size) -> Data in
+//                return xmlData.subdata(in: position..<position+size)
+//            })
+//            
+//            // Add image file to ZIP
+//            if let imageData = floorPlanImage.pngData() {
+//                try archive.addEntry(with: "\(filename).png", type: .file, uncompressedSize: UInt32(imageData.count), provider: { (position, size) -> Data in
+//                    return imageData.subdata(in: position..<position+size)
+//                })
+//            }
+//            
+//            showingSaveSuccessAlert = true
+//        } catch {
+//            saveError = error
+//            showingSaveErrorAlert = true
+//        }
+//    }
+    private func createAndShareZIP() {
+        isCreatingZIP = true
         
-        do {
-            try xmlString.write(to: url, atomically: true, encoding: .utf8)
-            showingSaveSuccessAlert = true
-        } catch {
-            saveError = error
-            showingSaveErrorAlert = true
-        }
-    }
-    private func saveZIPFile() {
         let filename = "RoomPlan_Export_\(Date().timeIntervalSince1970)"
         let zipFilename = "\(filename).zip"
         
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let zipFileURL = documentsDirectory.appendingPathComponent(zipFilename)
-        
-        guard let archive = Archive(url: zipFileURL, accessMode: .create) else {
-            saveError = NSError(domain: "ZIPCreation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create ZIP archive"])
-            showingSaveErrorAlert = true
-            return
-        }
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let zipFileURL = tempDirectory.appendingPathComponent(zipFilename)
         
         do {
+            guard let archive = Archive(url: zipFileURL, accessMode: .create) else {
+                throw NSError(domain: "ZIPCreation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create ZIP archive"])
+            }
+            
             // Add XML file to ZIP
             let xmlData = xmlString.data(using: .utf8)!
             try archive.addEntry(with: "\(filename).xml", type: .file, uncompressedSize: UInt32(xmlData.count), provider: { (position, size) -> Data in
@@ -261,10 +297,29 @@ struct ExportView: View {
                 })
             }
             
-            showingSaveSuccessAlert = true
+            self.zipFileURL = zipFileURL
+            
+            DispatchQueue.main.async {
+                isCreatingZIP = false
+                showingShareSheet = true
+            }
         } catch {
-            saveError = error
-            showingSaveErrorAlert = true
+            DispatchQueue.main.async {
+                isCreatingZIP = false
+                errorMessage = "Error creating ZIP: \(error.localizedDescription)"
+                showingErrorAlert = true
+            }
         }
     }
+}
+
+struct ActivityViewController: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+        return controller
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

@@ -11,7 +11,8 @@ struct FloorPlanView: View {
     @State private var showingSaveAlert = false
     @State private var saveAlertMessage = ""
     @State private var showingExportView = false
-
+    @State private var floorPlanImage: UIImage?
+    
     var body: some View {
         ZStack {
             SpriteView(scene: scene ?? FloorPlanScene(capturedRoom: capturedRoom))
@@ -56,10 +57,23 @@ struct FloorPlanView: View {
             Alert(title: Text("Save Image"), message: Text(saveAlertMessage), dismissButton: .default(Text("OK")))
         }
         .sheet(isPresented: $showingExportView) {
-            ExportView(capturedRoom: capturedRoom)
+            if let image = floorPlanImage {
+                ExportView(capturedRoom: capturedRoom, floorPlanImage: image)
+            }
+        }
+        .onChange(of: showingExportView) { newValue in
+            if newValue {
+                captureFloorPlanImage()
+            }
         }
     }
-    
+    private func captureFloorPlanImage() {
+        guard let scene = scene, let view = scene.view else { return }
+        let renderer = UIGraphicsImageRenderer(size: view.bounds.size)
+        floorPlanImage = renderer.image { ctx in
+            view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
+        }
+    }
     private func requestPhotoLibraryPermission() {
         PHPhotoLibrary.requestAuthorization { status in
             DispatchQueue.main.async {

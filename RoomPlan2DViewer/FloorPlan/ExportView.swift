@@ -8,9 +8,12 @@
 import SwiftUI
 import RoomPlan
 import SceneKit
+import ZIPFoundation
+import UniformTypeIdentifiers
 
 struct ExportView: View {
     let capturedRoom: CapturedRoom
+    let floorPlanImage: UIImage
     @Environment(\.presentationMode) var presentationMode
     @State private var xmlString: String = ""
     @State private var showingSaveSuccessAlert = false
@@ -28,13 +31,13 @@ struct ExportView: View {
                         .padding()
                 }
             }
-            .navigationBarTitle("Export XML", displayMode: .inline)
+            .navigationBarTitle("Preview XML", displayMode: .inline)
             .navigationBarItems(
                 leading: Button("Cancel") {
                     presentationMode.wrappedValue.dismiss()
                 },
-                trailing: Button("Save") {
-                    saveXMLToFile()
+                trailing: Button("Save ZIP") {
+                    saveZIPFile()
                 }
             )
         }
@@ -44,7 +47,7 @@ struct ExportView: View {
         .alert(isPresented: $showingSaveSuccessAlert) {
             Alert(
                 title: Text("Success"),
-                message: Text("XML file has been saved successfully."),
+                message: Text("ZIP file has been saved successfully."),
                 dismissButton: .default(Text("OK")) {
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -60,6 +63,67 @@ struct ExportView: View {
     }
 
     private func generateXML() {
+        var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        xml += "<Room>\n"
+        
+        // Calculate room height (assuming it's the maximum height of all walls)
+        let roomHeight = capturedRoom.walls.map { $0.dimensions.y }.max() ?? 0
+        xml += "  <SceneHigh value=\"\(Int(roomHeight * 100))\"/>\n"
+        
+        // Walls
+        xml += "  <WallInfo num=\"\(capturedRoom.walls.count)\"/>\n"
+        for (index, wall) in capturedRoom.walls.enumerated() {
+            let startPoint = transformPoint(SIMD3<Float>(0, 0, 0), wall.transform)
+            let endPoint = transformPoint(SIMD3<Float>(wall.dimensions.x, 0, 0), wall.transform)
+            xml += "  <WallData Type=\"0\" Width=\"\(Int(wall.dimensions.z * 100))\" "
+            xml += "StartX=\"\(startPoint.x)\" StartY=\"\(startPoint.z)\" StartZ=\"0\" "
+            xml += "EndX=\"\(endPoint.x)\" EndY=\"\(endPoint.z)\" EndZ=\"0\" ShowLabel=\"1\"/>\n"
+        }
+        
+        // Doors
+        xml += "  <DoorInfo num=\"\(capturedRoom.doors.count)\"/>\n"
+        for door in capturedRoom.doors {
+            let position = transformPoint(SIMD3<Float>(door.dimensions.x / 2, 0, 0), door.transform)
+            let rotation = extractRotationY(door.transform)
+            xml += "  <DoorData PosX=\"\(position.x)\" PosY=\"\(position.z)\" PosZ=\"0\" "
+            xml += "Length=\"\(Int(door.dimensions.x * 100))\" Width=\"\(Int(door.dimensions.z * 100))\" Height=\"\(Int(door.dimensions.y * 100))\" "
+            xml += "Rotate=\"\(rotation)\" Mode=\"0\" Mirror=\"0\" ModelType=\"3ds\" "
+            xml += "source=\"\" numTexture=\"1\" ReplaceMaterial=\"0\" DoorStyle=\"100\" Material=\"\">\n"
+            xml += "    <Texture></Texture>\n"
+            xml += "  </DoorData>\n"
+        }
+        
+        // Windows
+        xml += "  <WinInfo num=\"\(capturedRoom.windows.count)\"/>\n"
+        for window in capturedRoom.windows {
+            let position = transformPoint(SIMD3<Float>(window.dimensions.x / 2, 0, 0), window.transform)
+            let rotation = extractRotationY(window.transform)
+            xml += "  <WinData PosX=\"\(position.x)\" PosY=\"\(position.z)\" PosZ=\"0\" "
+            xml += "Length=\"\(Int(window.dimensions.x * 100))\" Width=\"\(Int(window.dimensions.z * 100))\" Height=\"\(Int(window.dimensions.y * 100))\" "
+            xml += "Rotate=\"\(rotation)\" Mode=\"0\" Dist=\"100\" "
+            xml += "source=\"\" ModelType=\"3ds\" type=\"0\" "
+            xml += "index=\"undefined\" indexName=\"undefined\" int=\"undefined\" investBelong=\"undefined\" putonModel=\"undefined\" "
+            xml += "constructionMode=\"undefined\" ReplaceMaterial=\"0\" Material=\"\">\n"
+            xml += "    <Texture></Texture>\n"
+            xml += "  </WinData>\n"
+        }
+        
+        xml += "</Room>"
+        
+        xmlString = xml
+    }
+
+    private func transformPoint(_ point: SIMD3<Float>, _ transform: simd_float4x4) -> SIMD3<Float> {
+        let homogeneousPoint = SIMD4<Float>(point.x, point.y, point.z, 1)
+        let transformedPoint = transform * homogeneousPoint
+        return SIMD3<Float>(transformedPoint.x, transformedPoint.y, transformedPoint.z) / transformedPoint.w
+    }
+
+    private func extractRotationY(_ transform: simd_float4x4) -> Float {
+        return atan2(transform.columns.0.z, transform.columns.0.x)
+    }
+    
+    private func generateXML_bak() {
         var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         xml += "<CapturedRoom>\n"
         
@@ -164,6 +228,39 @@ struct ExportView: View {
         
         do {
             try xmlString.write(to: url, atomically: true, encoding: .utf8)
+            showingSaveSuccessAlert = true
+        } catch {
+            saveError = error
+            showingSaveErrorAlert = true
+        }
+    }
+    private func saveZIPFile() {
+        let filename = "RoomPlan_Export_\(Date().timeIntervalSince1970)"
+        let zipFilename = "\(filename).zip"
+        
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let zipFileURL = documentsDirectory.appendingPathComponent(zipFilename)
+        
+        guard let archive = Archive(url: zipFileURL, accessMode: .create) else {
+            saveError = NSError(domain: "ZIPCreation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create ZIP archive"])
+            showingSaveErrorAlert = true
+            return
+        }
+        
+        do {
+            // Add XML file to ZIP
+            let xmlData = xmlString.data(using: .utf8)!
+            try archive.addEntry(with: "\(filename).xml", type: .file, uncompressedSize: UInt32(xmlData.count), provider: { (position, size) -> Data in
+                return xmlData.subdata(in: position..<position+size)
+            })
+            
+            // Add image file to ZIP
+            if let imageData = floorPlanImage.pngData() {
+                try archive.addEntry(with: "\(filename).png", type: .file, uncompressedSize: UInt32(imageData.count), provider: { (position, size) -> Data in
+                    return imageData.subdata(in: position..<position+size)
+                })
+            }
+            
             showingSaveSuccessAlert = true
         } catch {
             saveError = error

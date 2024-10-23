@@ -54,8 +54,8 @@ let windowColor = SKColor(red: 0.7, green: 0.9, blue: 1.0, alpha: 1.0) // 浅蓝
 let doorColor = SKColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0) // 棕色
 
 // 修改线条宽度常量
-let wallWidth: CGFloat = 11.0
-let doorWidth: CGFloat = 4.0
-let windowWidth: CGFloat = 4.0
+let wallWidth: CGFloat = 22.0
+let doorWidth: CGFloat = 8.0
+let windowWidth: CGFloat = 8.0
 
 let doorWindowDimensionOffset: CGFloat = 20.0

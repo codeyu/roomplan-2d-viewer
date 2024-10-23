@@ -20,6 +20,7 @@
 		953FDAE829BE14C900A7AACF /* FloorPlanSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953FDAE729BE14C900A7AACF /* FloorPlanSurface.swift */; };
 		953FDAEA29BE251B00A7AACF /* DrawParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953FDAE929BE251B00A7AACF /* DrawParameters.swift */; };
 		953FDAEC29BE2D9500A7AACF /* FloorPlanObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953FDAEB29BE2D9500A7AACF /* FloorPlanObject.swift */; };
+		CE6F22C72CC88F7F0004F84D /*  FloorPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6F22C62CC88F7C0004F84D /*  FloorPlanView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		953FDAE729BE14C900A7AACF /* FloorPlanSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanSurface.swift; sourceTree = "<group>"; };
 		953FDAE929BE251B00A7AACF /* DrawParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawParameters.swift; sourceTree = "<group>"; };
 		953FDAEB29BE2D9500A7AACF /* FloorPlanObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanObject.swift; sourceTree = "<group>"; };
+		CE6F22C62CC88F7C0004F84D /*  FloorPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = " FloorPlanView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +112,7 @@
 		953FDADF29BAA09000A7AACF /* FloorPlan */ = {
 			isa = PBXGroup;
 			children = (
+				CE6F22C62CC88F7C0004F84D /*  FloorPlanView.swift */,
 				953FDAE129BAA0BD00A7AACF /* FloorPlanScene.swift */,
 				953FDAE729BE14C900A7AACF /* FloorPlanSurface.swift */,
 				953FDAEB29BE2D9500A7AACF /* FloorPlanObject.swift */,
@@ -188,6 +191,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE6F22C72CC88F7F0004F84D /*  FloorPlanView.swift in Sources */,
 				953FDAE429BAA1D900A7AACF /* simd_float4x4+EulerAnglesAndPosition.swift in Sources */,
 				953FDAEA29BE251B00A7AACF /* DrawParameters.swift in Sources */,
 				95360D0E29A8E14500BDBED0 /* RoomCaptureModel.swift in Sources */,
@@ -344,7 +348,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "CodeYu.RoomPlan2DViewer";
+				PRODUCT_BUNDLE_IDENTIFIER = CodeYu.RoomPlan2DViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -375,7 +379,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "CodeYu.RoomPlan2DViewer";
+				PRODUCT_BUNDLE_IDENTIFIER = CodeYu.RoomPlan2DViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

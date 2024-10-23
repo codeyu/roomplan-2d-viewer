@@ -25,19 +25,36 @@ struct RoomCaptureScanView: View {
             VStack {
                 Spacer()
                 
-                // The button changes accoring to the state of isScanning
-                Button(isScanning ? "Done" : "View 2D floor plan") {
-                    if isScanning {
-                        stopSession()
-                    } else {
-                        isShowingFloorPlan = true
+                HStack {
+                    if !isScanning {
+                        Button("Start New Scanning") {
+                            // 重置当前的扫描状态
+                            model.finalRoom = nil
+                            isShowingFloorPlan = false
+                            // 开始新的扫描
+                            startSession()
+                        }
+                        .padding()
+                        .background(Color("AccentColor"))
+                        .foregroundColor(.white)
+                        .clipShape(Capsule())
+                        .fontWeight(.bold)
                     }
+                    
+                    // The button changes according to the state of isScanning
+                    Button(isScanning ? "Done" : "View 2D floor plan") {
+                        if isScanning {
+                            stopSession()
+                        } else {
+                            isShowingFloorPlan = true
+                        }
+                    }
+                    .padding()
+                    .background(Color("AccentColor"))
+                    .foregroundColor(.white)
+                    .clipShape(Capsule())
+                    .fontWeight(.bold)
                 }
-                .padding()
-                .background(Color("AccentColor"))
-                .foregroundColor(.white)
-                .clipShape(Capsule())
-                .fontWeight(.bold)
                 .padding(.bottom)
             }
         }
@@ -48,9 +65,8 @@ struct RoomCaptureScanView: View {
         }
         
         // Show the floor plan in full screen
-        .fullScreenCover(isPresented: $isShowingFloorPlan) {
-            SpriteView(scene: FloorPlanScene(capturedRoom: model.finalRoom!))
-                .ignoresSafeArea()
+        .sheet(isPresented: $isShowingFloorPlan) {
+            FloorPlanView(capturedRoom: model.finalRoom!)
         }
     }
     

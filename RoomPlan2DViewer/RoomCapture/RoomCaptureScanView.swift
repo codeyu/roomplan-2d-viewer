@@ -67,6 +67,7 @@ struct RoomCaptureScanView: View {
         // Show the floor plan in full screen
         .sheet(isPresented: $isShowingFloorPlan) {
             FloorPlanView(capturedRoom: model.finalRoom!)
+            .interactiveDismissDisabled() 
         }
     }
     

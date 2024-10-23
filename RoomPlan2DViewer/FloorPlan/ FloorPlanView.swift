@@ -24,6 +24,18 @@ struct FloorPlanView: View {
                 }
             
             VStack {
+                HStack {
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color("AccentColor"))
+                            .font(.title)
+                            .padding()
+                    }
+                    Spacer()
+                }
+
                 Spacer()
                 
                 HStack {
@@ -41,7 +53,7 @@ struct FloorPlanView: View {
                     Button(action: {
                         showingExportView = true
                     }) {
-                        Text("Export XML")
+                        Text("Export...")
                             .padding()
                             .background(Color("AccentColor"))
                             .foregroundColor(.white)

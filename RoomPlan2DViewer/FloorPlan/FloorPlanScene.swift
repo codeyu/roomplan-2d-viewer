@@ -18,7 +18,7 @@ class FloorPlanScene: SKScene {
     
     // MARK: - Init
     
-    init(capturedRoom: CapturedRoom) {
+    init(capturedRoom: CapturedRoom, isDrawObjects: Bool = false) {
         self.surfaces = capturedRoom.doors + capturedRoom.openings + capturedRoom.walls + capturedRoom.windows
         self.objects = capturedRoom.objects
         
@@ -31,7 +31,9 @@ class FloorPlanScene: SKScene {
         addCamera()
         
         drawSurfaces()
-        drawObjects()
+        if isDrawObjects {
+            drawObjects()
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {

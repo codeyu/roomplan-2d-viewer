@@ -19,7 +19,6 @@ let floorPlanSurfaceColor = UIColor(named: "AccentColor")!
 let surfaceWith: CGFloat = 22.0
 let hideSurfaceWith: CGFloat = 24.0
 let windowWidth_old: CGFloat = 8.0
-let doorArcWidth: CGFloat = 8.0
 let objectOutlineWidth: CGFloat = 8.0
 
 // zPositions
@@ -51,11 +50,14 @@ let labelFont = "Helvetica"
 // 在文件顶部添加新的颜色常量
 let wallColor = SKColor.darkGray
 let windowColor = SKColor(red: 0.7, green: 0.9, blue: 1.0, alpha: 1.0) // 浅蓝色
-let doorColor = SKColor(red: 0.6, green: 0.4, blue: 0.2, alpha: 1.0) // 棕色
+let doorColor = SKColor(red: 0.8, green: 0.9, blue: 1.0, alpha: 1.0) // Light blue color
 
 // 修改线条宽度常量
-let wallWidth: CGFloat = 22.0
-let doorWidth: CGFloat = 8.0
+let wallWidth: CGFloat = 16.0
+let doorWidth: CGFloat = 4.0
+let doorArcWidth: CGFloat = 2.0  // 门开口弧线的宽度
+let doorArcDashLength: CGFloat = 4.0  // 门开口弧线的虚线长度
+let doorArcGapLength: CGFloat = 2.0  // 门开口弧线的虚线间隔
 let windowWidth: CGFloat = 8.0
-
 let doorWindowDimensionOffset: CGFloat = 20.0
+

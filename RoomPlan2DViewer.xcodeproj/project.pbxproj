@@ -20,6 +20,9 @@
 		953FDAE829BE14C900A7AACF /* FloorPlanSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953FDAE729BE14C900A7AACF /* FloorPlanSurface.swift */; };
 		953FDAEA29BE251B00A7AACF /* DrawParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953FDAE929BE251B00A7AACF /* DrawParameters.swift */; };
 		953FDAEC29BE2D9500A7AACF /* FloorPlanObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 953FDAEB29BE2D9500A7AACF /* FloorPlanObject.swift */; };
+		CE6F22C72CC88F7F0004F84D /*  FloorPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6F22C62CC88F7C0004F84D /*  FloorPlanView.swift */; };
+		CE6F22CE2CC8C6710004F84D /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE6F22CD2CC8C66F0004F84D /* ExportView.swift */; };
+		CE6F22D22CC8D4FE0004F84D /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = CE6F22D12CC8D4FE0004F84D /* ZIPFoundation */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +40,9 @@
 		953FDAE729BE14C900A7AACF /* FloorPlanSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanSurface.swift; sourceTree = "<group>"; };
 		953FDAE929BE251B00A7AACF /* DrawParameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawParameters.swift; sourceTree = "<group>"; };
 		953FDAEB29BE2D9500A7AACF /* FloorPlanObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanObject.swift; sourceTree = "<group>"; };
+		CE6F22C62CC88F7C0004F84D /*  FloorPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = " FloorPlanView.swift"; sourceTree = "<group>"; };
+		CE6F22CD2CC8C66F0004F84D /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		CE6F22CF2CC8D3770004F84D /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE6F22D22CC8D4FE0004F84D /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,6 +69,7 @@
 		95360CF329A8DC8700BDBED0 = {
 			isa = PBXGroup;
 			children = (
+				CE6F22CF2CC8D3770004F84D /* Package.swift */,
 				95360CFE29A8DC8700BDBED0 /* RoomPlan2DViewer */,
 				95360CFD29A8DC8700BDBED0 /* Products */,
 			);
@@ -110,6 +118,8 @@
 		953FDADF29BAA09000A7AACF /* FloorPlan */ = {
 			isa = PBXGroup;
 			children = (
+				CE6F22CD2CC8C66F0004F84D /* ExportView.swift */,
+				CE6F22C62CC88F7C0004F84D /*  FloorPlanView.swift */,
 				953FDAE129BAA0BD00A7AACF /* FloorPlanScene.swift */,
 				953FDAE729BE14C900A7AACF /* FloorPlanSurface.swift */,
 				953FDAEB29BE2D9500A7AACF /* FloorPlanObject.swift */,
@@ -162,6 +172,9 @@
 				Base,
 			);
 			mainGroup = 95360CF329A8DC8700BDBED0;
+			packageReferences = (
+				CE6F22D02CC8D4FE0004F84D /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
 			productRefGroup = 95360CFD29A8DC8700BDBED0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -188,9 +201,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE6F22C72CC88F7F0004F84D /*  FloorPlanView.swift in Sources */,
 				953FDAE429BAA1D900A7AACF /* simd_float4x4+EulerAnglesAndPosition.swift in Sources */,
 				953FDAEA29BE251B00A7AACF /* DrawParameters.swift in Sources */,
 				95360D0E29A8E14500BDBED0 /* RoomCaptureModel.swift in Sources */,
+				CE6F22CE2CC8C6710004F84D /* ExportView.swift in Sources */,
 				95360D0229A8DC8700BDBED0 /* WelcomeView.swift in Sources */,
 				953FDAE229BAA0BD00A7AACF /* FloorPlanScene.swift in Sources */,
 				953FDAE629BB8F3E00A7AACF /* CGPoint+RotateAround.swift in Sources */,
@@ -334,6 +349,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "RoomPlan requires the camera to scan a room";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs access to save floor plan images to your photo library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -344,7 +360,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "CodeYu.RoomPlan2DViewer";
+				PRODUCT_BUNDLE_IDENTIFIER = CodeYu.RoomPlan2DViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -365,6 +381,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "RoomPlan requires the camera to scan a room";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "This app needs access to save floor plan images to your photo library.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -375,7 +392,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "CodeYu.RoomPlan2DViewer";
+				PRODUCT_BUNDLE_IDENTIFIER = CodeYu.RoomPlan2DViewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -405,6 +422,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CE6F22D02CC8D4FE0004F84D /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.19;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CE6F22D12CC8D4FE0004F84D /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CE6F22D02CC8D4FE0004F84D /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 95360CF429A8DC8700BDBED0 /* Project object */;
 }

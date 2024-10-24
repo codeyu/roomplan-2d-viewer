@@ -18,11 +18,11 @@ class FloorPlanScene: SKScene {
     
     // MARK: - Init
     
-    init(capturedRoom: CapturedRoom) {
+    init(capturedRoom: CapturedRoom, isDrawObjects: Bool = false) {
         self.surfaces = capturedRoom.doors + capturedRoom.openings + capturedRoom.walls + capturedRoom.windows
         self.objects = capturedRoom.objects
         
-        super.init(size: CGSize(width: 1500, height: 1500))
+        super.init(size: CGSize(width: 1800, height: 1800))
         
         self.scaleMode = .aspectFill
         self.anchorPoint = CGPoint(x: 0.5, y: 0.5)
@@ -31,7 +31,9 @@ class FloorPlanScene: SKScene {
         addCamera()
         
         drawSurfaces()
-        drawObjects()
+        if isDrawObjects {
+            drawObjects()
+        }
     }
     
     required init?(coder aDecoder: NSCoder) {

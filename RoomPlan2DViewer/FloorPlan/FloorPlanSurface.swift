@@ -2,7 +2,7 @@
 //  FloorPlanSurface.swift
 //  RoomPlan 2D
 //
-//  Created by CodeYu on 12/03/2023.
+//  Created by CodeYu on 22/10/2024.
 //
 
 import SpriteKit
@@ -83,41 +83,80 @@ class FloorPlanSurface: SKNode {
         //TODO
     }
     private func drawDoor() {
-        let hideWallPath = createPath(from: pointA, to: pointB)
-        let doorPath = createPath(from: pointA, to: pointC)
-
+        let doorLength = CGFloat(capturedSurface.dimensions.x) * scalingFactor
+        let doorColor = SKColor(red: 0.8, green: 0.9, blue: 1.0, alpha: 1.0) // Light blue color
+        
         // Hide the wall underneath the door
+        let hideWallPath = createPath(from: pointA, to: pointB)
         let hideWallShape = createShapeNode(from: hideWallPath)
         hideWallShape.strokeColor = floorPlanBackgroundColor
         hideWallShape.lineWidth = hideSurfaceWith
         hideWallShape.zPosition = hideSurfaceZPosition
         
-        // The door itself
+        // The door's arc parameters
+        let arcCenter = pointA
+        let arcRadius = doorLength
+        let startAngle: CGFloat = 0 // Start from 0 degrees (pointing right)
+        let endAngle: CGFloat = .pi / 2 // End at 90 degrees (pointing up)
+        
+        // Calculate the end point of the door (where the arc ends)
+        let doorEndPoint = CGPoint(x: arcCenter.x + arcRadius * cos(endAngle),
+                                y: arcCenter.y + arcRadius * sin(endAngle))
+        
+        // The door itself (solid line)
+        let doorPath = CGMutablePath()
+        doorPath.move(to: pointA)
+        doorPath.addLine(to: doorEndPoint)
+        
         let doorShape = createShapeNode(from: doorPath)
-        doorShape.lineCap = .square
+        doorShape.strokeColor = doorColor
+        doorShape.lineWidth = doorWidth
         doorShape.zPosition = doorZPosition
         
-        // The door's arc
-        let doorArcPath = CGMutablePath()
-        doorArcPath.addArc(
-            center: pointA,
-            radius: halfLength * 2,
-            startAngle: 0.25 * .pi,
-            endAngle: 0,
-            clockwise: true
-        )
+        // The door's arc (90 degrees, dotted line)
+        let doorArcNode = SKNode()
+        doorArcNode.zPosition = doorArcZPosition
         
-        // Create a dashed path
-        let dashPattern: [CGFloat] = [24.0, 8.0]
-        let dashedArcPath = doorArcPath.copy(dashingWithPhase: 1, lengths: dashPattern)
-
-        let doorArcShape = createShapeNode(from: dashedArcPath)
-        doorArcShape.lineWidth = doorArcWidth
-        doorArcShape.zPosition = doorArcZPosition
+        // Create dotted line effect
+        let dashLength: CGFloat = 2.0
+        let gapLength: CGFloat = 2.0
+        var angle = startAngle
+        while angle < endAngle {
+            let startPoint = CGPoint(x: arcCenter.x + arcRadius * cos(angle),
+                                    y: arcCenter.y + arcRadius * sin(angle))
+            angle += (dashLength / arcRadius)
+            let endPoint = CGPoint(x: arcCenter.x + arcRadius * cos(angle),
+                                y: arcCenter.y + arcRadius * sin(angle))
+            
+            let dashPath = CGMutablePath()
+            dashPath.move(to: startPoint)
+            dashPath.addLine(to: endPoint)
+            
+            let dashNode = SKShapeNode(path: dashPath)
+            dashNode.strokeColor = doorColor
+            dashNode.lineWidth = doorArcWidth
+            
+            doorArcNode.addChild(dashNode)
+            
+            angle += (gapLength / arcRadius)
+        }
+        
+        // Add dimension line and label
+        let doorDimPointA = CGPoint(x: pointADim.x, y: pointADim.y - doorWindowDimensionOffset)
+        let doorDimPointB = CGPoint(x: pointBDim.x, y: pointBDim.y - doorWindowDimensionOffset)
+        
+        let dimensionsPath = createDimPath(from: doorDimPointA, to: doorDimPointB)
+        let dimensionsShape = createDimNode(from: dimensionsPath)
+        dimensionsShape.lineCap = .round
+        
+        let dimensionsLabel = createDimLabel()
+        dimensionsLabel.position.y -= doorWindowDimensionOffset
         
         addChild(hideWallShape)
         addChild(doorShape)
-        addChild(doorArcShape)
+        addChild(doorArcNode)
+        addChild(dimensionsShape)
+        addChild(dimensionsLabel)
     }
     
     private func drawOpening() {
@@ -135,6 +174,8 @@ class FloorPlanSurface: SKNode {
     private func drawWall() {
         let wallPath = createPath(from: pointA, to: pointB)
         let wallShape = createShapeNode(from: wallPath)
+        wallShape.strokeColor = wallColor
+        wallShape.lineWidth = wallWidth
         wallShape.lineCap = .round
         
         let dimensionsPath = createDimPath(from: pointADim, to: pointBDim)
@@ -149,21 +190,52 @@ class FloorPlanSurface: SKNode {
     }
     
     private func drawWindow() {
-        let windowPath = createPath(from: pointA, to: pointB)
-        
         // Hide the wall underneath the window
-        let hideWallShape = createShapeNode(from: windowPath)
+        let hidePath = createPath(from: pointA, to: pointB)
+        let hideWallShape = createShapeNode(from: hidePath)
         hideWallShape.strokeColor = floorPlanBackgroundColor
         hideWallShape.lineWidth = hideSurfaceWith
         hideWallShape.zPosition = hideSurfaceZPosition
+        // 创建白色背景
+        let backgroundPath = createPath(from: pointA, to: pointB)
+        let backgroundShape = createShapeNode(from: backgroundPath)
+        backgroundShape.strokeColor = .white
+        backgroundShape.lineWidth = windowWidth + 4 // 稍微宽一些，以确保完全覆盖墙壁
+        backgroundShape.zPosition = hideSurfaceZPosition
+
+        // 创建两条平行线
+        let windowPath = CGMutablePath()
+        let lineSpacing: CGFloat = 3.0 // 两条线之间的间距
         
-        // The window itself
-        let windowShape = createShapeNode(from: windowPath)
-        windowShape.lineWidth = windowWidth
+        // 上面的线
+        windowPath.move(to: CGPoint(x: pointA.x, y: pointA.y + lineSpacing/2))
+        windowPath.addLine(to: CGPoint(x: pointB.x, y: pointB.y + lineSpacing/2))
+        
+        // 下面的线
+        windowPath.move(to: CGPoint(x: pointA.x, y: pointA.y - lineSpacing/2))
+        windowPath.addLine(to: CGPoint(x: pointB.x, y: pointB.y - lineSpacing/2))
+
+        let windowShape = SKShapeNode(path: windowPath)
+        windowShape.strokeColor = windowColor
+        windowShape.lineWidth = 1 // 使用较细的线条
         windowShape.zPosition = windowZPosition
+
+        // 添加尺寸线和标签
+        let windowDimPointA = CGPoint(x: pointADim.x, y: pointADim.y - doorWindowDimensionOffset)
+        let windowDimPointB = CGPoint(x: pointBDim.x, y: pointBDim.y - doorWindowDimensionOffset)
         
+        let dimensionsPath = createDimPath(from: windowDimPointA, to: windowDimPointB)
+        let dimensionsShape = createDimNode(from: dimensionsPath)
+        dimensionsShape.lineCap = .round
+        
+        let dimensionsLabel = createDimLabel()
+        dimensionsLabel.position.y -= doorWindowDimensionOffset // 调整标签位置
+
         addChild(hideWallShape)
+        addChild(backgroundShape)
         addChild(windowShape)
+        addChild(dimensionsShape)
+        addChild(dimensionsLabel)
     }
     
     // MARK: - Helper functions
@@ -178,9 +250,7 @@ class FloorPlanSurface: SKNode {
     
     private func createShapeNode(from path: CGPath) -> SKShapeNode {
         let shapeNode = SKShapeNode(path: path)
-        shapeNode.strokeColor = floorPlanSurfaceColor
-        shapeNode.lineWidth = surfaceWith
-        
+        // 移除默认的颜色设置，因为我们现在在每个具体的绘制方法中设置颜色
         return shapeNode
     }
     
@@ -238,19 +308,27 @@ class FloorPlanSurface: SKNode {
         
         // main line with gap for label
         path.move(to: pointA)
-        path.addLine(to: CGPoint(x: -dimensionLabelWidth/2, y: -dimensionLineDistFromSurface))
+        path.addLine(to: CGPoint(x: -dimensionLabelWidth/2, y: pointA.y))
         path.move(to: pointB)
-        path.addLine(to: CGPoint(x: dimensionLabelWidth/2, y: -dimensionLineDistFromSurface))
+        path.addLine(to: CGPoint(x: dimensionLabelWidth/2, y: pointB.y))
         
         return path
     }
     
     private func createDimLabel() -> SKLabelNode {
-        let dimTotalInches = CGFloat(self.capturedSurface.dimensions.x) * metersToInchesFactor
-        let feet = Int(dimTotalInches / 12)
-        let inches = Int(round(dimTotalInches.truncatingRemainder(dividingBy: 12)))
+        let dimMeters = self.capturedSurface.dimensions.x
         
-        let label = SKLabelNode(text: "\(feet)' \(inches)\"")
+        // 根据尺寸大小选择合适的单位（米或厘米）
+        let (value, unit) = if dimMeters < 1 {
+            (dimMeters * 100, "cm")
+        } else {
+            (dimMeters, "m")
+        }
+        
+        // 格式化标签文本
+        let formattedText = String(format: "%.2f %@", value, unit)
+        
+        let label = SKLabelNode(text: formattedText)
         label.fontColor = floorPlanSurfaceColor
         label.position.y = -dimensionLineDistFromSurface - labelFontSize/2
         label.fontSize = labelFontSize

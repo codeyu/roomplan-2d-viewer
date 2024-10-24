@@ -297,6 +297,14 @@ struct ExportView: View {
                 })
             }
             
+            // Add USDZ file to ZIP
+            let usdzURL = tempDirectory.appendingPathComponent("\(filename).usdz")
+            try capturedRoom.export(to: usdzURL)
+            let usdzData = try Data(contentsOf: usdzURL)
+            try archive.addEntry(with: "\(filename).usdz", type: .file, uncompressedSize: UInt32(usdzData.count), provider: { (position, size) -> Data in
+                return usdzData.subdata(in: position..<position+size)
+            })
+            
             self.zipFileURL = zipFileURL
             
             DispatchQueue.main.async {

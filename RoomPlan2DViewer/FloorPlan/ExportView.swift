@@ -21,6 +21,7 @@ struct ExportView: View {
     @State private var zipFileURL: URL?
     @State private var showingErrorAlert = false
     @State private var errorMessage: String = ""
+    @State private var jsonString: String = ""
 
     var body: some View {
         NavigationView {
@@ -290,6 +291,13 @@ struct ExportView: View {
                 return xmlData.subdata(in: position..<position+size)
             })
             
+            // Add JSON file to ZIP
+            let jsonString = generateJSON()
+            let jsonData = jsonString.data(using: .utf8)!
+            try archive.addEntry(with: "\(filename).json", type: .file, uncompressedSize: UInt32(jsonData.count), provider: { (position, size) -> Data in
+                return jsonData.subdata(in: position..<position+size)
+            })
+            
             // Add image file to ZIP
             if let imageData = floorPlanImage.pngData() {
                 try archive.addEntry(with: "\(filename).png", type: .file, uncompressedSize: UInt32(imageData.count), provider: { (position, size) -> Data in
@@ -318,6 +326,72 @@ struct ExportView: View {
                 showingErrorAlert = true
             }
         }
+    }
+
+    private func generateJSON() -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        
+        let roomData: [String: Any] = [
+            "walls": capturedRoom.walls.enumerated().map { index, wall in
+                [
+                    "id": index,
+                    "dimensions": [
+                        "x": wall.dimensions.x,
+                        "y": wall.dimensions.y,
+                        "z": wall.dimensions.z
+                    ],
+                    "transform": transformMatrixToArray(wall.transform)
+                ]
+            },
+            "doors": capturedRoom.doors.enumerated().map { index, door in
+                [
+                    "id": index,
+                    "dimensions": [
+                        "x": door.dimensions.x,
+                        "y": door.dimensions.y,
+                        "z": door.dimensions.z
+                    ],
+                    "transform": transformMatrixToArray(door.transform)
+                ]
+            },
+            "windows": capturedRoom.windows.enumerated().map { index, window in
+                [
+                    "id": index,
+                    "dimensions": [
+                        "x": window.dimensions.x,
+                        "y": window.dimensions.y,
+                        "z": window.dimensions.z
+                    ],
+                    "transform": transformMatrixToArray(window.transform)
+                ]
+            },
+            "objects": capturedRoom.objects.enumerated().map { index, object in
+                [
+                    "id": index,
+                    "category": categoryToString(object.category),
+                    "dimensions": [
+                        "x": object.dimensions.x,
+                        "y": object.dimensions.y,
+                        "z": object.dimensions.z
+                    ],
+                    "transform": transformMatrixToArray(object.transform)
+                ]
+            }
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: roomData, options: .prettyPrinted)
+            return String(data: jsonData, encoding: .utf8) ?? "{}"
+        } catch {
+            print("Error generating JSON: \(error)")
+            return "{}"
+        }
+    }
+    
+    private func transformMatrixToArray(_ matrix: simd_float4x4) -> [Float] {
+        let columns = [matrix.columns.0, matrix.columns.1, matrix.columns.2, matrix.columns.3]
+        return columns.flatMap { [$0.x, $0.y, $0.z, $0.w] }
     }
 }
 
